@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Casino Royal</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        @keyframes flash {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .particles {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: gold;
+            border-radius: 50%;
+            animation: particle 1s ease-out;
+        }
+
+        @keyframes particle {
+            0% {
+                transform: translate(var(--tx), var(--ty));
+                opacity: 1;
+            }
+            100% {
+                transform: translate(0, 0);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-overlay"></div>
+
+    <!-- Звуковые эффекты -->
+    <audio id="spinSound" src="media/spin.mp3"></audio>
+    <audio id="winSound" src="media/win.mp3"></audio>
+    <audio id="bigWinSound" src="media/bigwin.mp3"></audio>
+    <audio id="bonusSound" src="media/bonus.mp3"></audio>
+    <audio id="bgMusic" src="media/background.mp3" loop autoplay></audio>
+
+    <div class="game-container">
+        <div class="header">
+            <div class="stats">
+                <div class="balance-container">
+                    Баланс: <span id="balance">1000</span>₽
+                </div>
+                <div class="bet-container">
+                    Ставка: <span id="currentBet">10</span>₽
+                </div>
+            </div>
+            <div class="sound-controls">
+                <button id="toggleMusic" class="icon-button">
+                    <span class="sound-icon">🔊</span>
+                    <div class="sound-waves"></div>
+                </button>
+                <input type="range" id="volumeControl" min="0" max="1" step="0.1" value="0.3" class="volume-slider">
+            </div>
+        </div>
+
+        <div class="slot-machine">
+            <div class="slot-frame">
+                <div class="slot-grid" id="slotGrid">
+                    <div class="reel">
+                        <div class="slot-cell">🍒</div>
+                        <div class="slot-cell">🍋</div>
+                        <div class="slot-cell">🍉</div>
+                    </div>
+                    <div class="reel">
+                        <div class="slot-cell">🍇</div>
+                        <div class="slot-cell">🍀</div>
+                        <div class="slot-cell">💎</div>
+                    </div>
+                    <div class="reel">
+                        <div class="slot-cell">🍋</div>
+                        <div class="slot-cell">🍉</div>
+                        <div class="slot-cell">🍒</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="bet-controls">
+                <button onclick="game.setBet(500)" class="bet-button">500₽</button>
+                <button onclick="game.setBet(10)" class="bet-button">10₽</button>
+                <button onclick="game.setBet(50)" class="bet-button">50₽</button>
+                <button onclick="game.setBet(100)" class="bet-button">100₽</button>
+                <button onclick="game.changeBet(-10)" class="bet-button">-10</button>
+                <button onclick="game.setMaxBet()" class="bet-button">MAX</button>
+                <button onclick="game.changeBet(10)" class="bet-button">+10</button>
+            </div>
+            <button id="spinButton" class="spin-button" onclick="game.spin()">КРУТИТЬ</button>
+        </div>
+
+        <div class="bonus-info">
+            <div class="bonus-progress">
+                <div class="progress-bar" id="bonusProgress"></div>
+            </div>
+            <div class="free-spins" id="freeSpinsCounter"></div>
+        </div>
+
+        <div id="winPopup" class="win-popup">
+            <div class="win-content">
+                <h2>ПОБЕДА!</h2>
+                <p>Выигрыш: <span id="winAmount">0</span>₽</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="paytable">
+        <h3>Таблица выплат</h3>
+        <div class="paytable-grid">
+            <div class="paytable-item">
+                <span>💎💎💎</span>
+                <span>x50</span>
+            </div>
+            <div class="paytable-item">
+                <span>🍀🍀🍀</span>
+                <span>x20</span>
+            </div>
+            <div class="paytable-item">
+                <span>🍇🍇🍇</span>
+                <span>x10</span>
+            </div>
+            <div class="paytable-item">
+                <span>🍉🍉🍉</span>
+                <span>x5</span>
+            </div>
+            <div class="paytable-item">
+                <span>🍋🍋🍋</span>
+                <span>x3</span>
+            </div>
+            <div class="paytable-item">
+                <span>🍒🍒🍒</span>
+                <span>x2</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
