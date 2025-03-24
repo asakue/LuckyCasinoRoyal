@@ -1,4 +1,3 @@
-
 class SlotMachine {
     constructor() {
         this.balance = 1000;
@@ -23,9 +22,12 @@ class SlotMachine {
         this.initEventListeners();
         this.updateUI();
 
-        // Запуск фоновой музыки после первого взаимодействия с пользователем
+        // Инициализация пула частиц
+        this.particlePool = [];
+        this.initParticlePool(50); // Создаем 50 частиц заранее
         this.startBackgroundMusicOnFirstInteraction();
     }
+  
 
     initSounds() {
         this.sounds = {
@@ -40,6 +42,16 @@ class SlotMachine {
         Object.values(this.sounds).forEach(sound => {
             if (sound) sound.volume = 0.3;
         });
+    }
+
+    initParticlePool(count) {
+        for (let i = 0; i < count; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            particle.style.display = 'none'; // Скрываем частицы по умолчанию
+            document.getElementById('particlesContainer').appendChild(particle);
+            this.particlePool.push(particle);
+        }
     }
 
     startBackgroundMusicOnFirstInteraction() {
@@ -91,11 +103,13 @@ class SlotMachine {
     }
 
     setBet(amount) {
-        if (amount >= 10 && amount <= this.balance) {
+        const maxBet = 500; // Максимальная ставка
+        if (amount >= 10 && amount <= Math.min(this.balance, maxBet)) {
             this.currentBet = amount;
             this.updateUI();
         } else {
-            this.showNotification(amount < 10 ? 'Минимальная ставка 10₽!' : 'Недостаточно средств!');
+            this.showNotification(amount < 10 ? 'Минимальная ставка 10₽!' : 
+                                 amount > maxBet ? `Максимальная ставка ${maxBet}₽!` : 'Недостаточно средств!');
         }
     }
 
@@ -132,7 +146,7 @@ class SlotMachine {
             this.balance += winAmount;
 
             // Воспроизведение звука win.mp3 или bigwin.mp3
-            if (winAmount >= this.currentBet * 5) {
+            if (winAmount >= this.currentBet) {
                 if (this.soundEnabled && this.sounds.bigWin) {
                     this.sounds.bigWin.currentTime = 0;
                     this.sounds.bigWin.play();
@@ -183,7 +197,7 @@ class SlotMachine {
 
             const animation = {
                 duration: 3000, // Общая длительность анимации
-                interval: 100, // Интервал между сменой символов
+                interval: 150, // Интервал между сменой символов
                 start: () => {
                     let startTime = Date.now();
                     const animate = () => {
@@ -257,15 +271,17 @@ class SlotMachine {
     createParticles() {
         const particleCount = 50;
         for (let i = 0; i < particleCount; i++) {
-            const particle = document.createElement('div');
-            particle.classList.add('particle');
+            const particle = this.particlePool[i]; // Берем частицу из пула
+            particle.style.display = 'block'; // Показываем частицу
             particle.style.left = `${Math.random() * 100}%`;
             particle.style.top = `${Math.random() * 100}%`;
             particle.style.setProperty('--tx', `${Math.random() * 200 - 100}px`);
             particle.style.setProperty('--ty', `${Math.random() * 200 - 100}px`);
-            document.body.appendChild(particle);
+            particle.style.opacity = '1';
     
-            setTimeout(() => particle.remove(), 1000);
+            setTimeout(() => {
+                particle.style.display = 'none'; // Скрываем частицу после анимации
+            }, 1000);
         }
     }
     
@@ -299,39 +315,67 @@ class SlotMachine {
         notification.className = 'notification';
         notification.textContent = message;
         document.body.appendChild(notification);
-        setTimeout(() => notification.remove(), 3000);
+
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
     }
 
     updateUI() {
+        // Обновляем отображение баланса и ставки
         this.balanceDisplay.textContent = this.balance;
         this.betDisplay.textContent = this.currentBet;
-        this.bonusProgress.style.width = `${(this.bonus.bonusPoints / this.bonus.maxBonusPoints) * 100}%`;
-        this.freeSpinsCounter.textContent = `Свободных вращений: ${this.freeSpins}`;
+
+        // Обновляем прогресс бонуса
+        this.bonusProgress.style.width = `${this.bonus.getProgressPercentage()}%`;
+
+        // Обновляем счетчик бесплатных вращений
+        if (this.freeSpins > 0) {
+            this.freeSpinsCounter.textContent = `Бесплатные вращения: ${this.freeSpins}`;
+            this.freeSpinsCounter.style.display = 'block';
+        } else {
+            this.freeSpinsCounter.textContent = '';
+            this.freeSpinsCounter.style.display = 'none';
+        }
+
+        // Блокируем кнопку, если баланс меньше ставки и нет бесплатных вращений
+        this.spinButton.disabled = (this.balance < this.currentBet && this.freeSpins === 0) || this.isSpinning;
     }
 }
 
 class BonusSystem {
-    constructor(slotMachine) {
-        this.slot = slotMachine;
+    constructor(game) {
+        this.game = game;
         this.bonusPoints = 0;
-        this.maxBonusPoints = 1000;
+        this.bonusThreshold = 1000;
         this.multiplier = 1;
-        this.freeSpins = 0;
     }
 
-    addPoints(amount) {
-        this.bonusPoints = Math.min(this.bonusPoints + amount, this.maxBonusPoints);
-        this.updateMultiplier();
+    addPoints(points) {
+        this.bonusPoints += points;
+        if (this.bonusPoints >= this.bonusThreshold) {
+            this.activateBonus();
+        }
     }
 
-    updateMultiplier() {
-        this.multiplier = 1 + (this.bonusPoints / this.maxBonusPoints) * 0.5;
+    activateBonus() {
+        // Активируем бонус (сейчас это просто бесплатные вращения)
+        this.grantFreeSpins(5);
+        this.bonusPoints = 0;
+        this.game.showNotification('Бонус активирован! +5 бесплатных вращений!');
     }
 
-    grantFreeSpins(amount) {
-        this.freeSpins += amount;
-        this.slot.freeSpins = this.freeSpins;
+    grantFreeSpins(spins) {
+        this.game.freeSpins += spins;
+        this.game.updateUI();
+    }
+
+    getProgressPercentage() {
+        return (this.bonusPoints / this.bonusThreshold) * 100;
     }
 }
 
-const game = new SlotMachine();
+// Создание экземпляра игры при загрузке страницы
+window.addEventListener('DOMContentLoaded', () => {
+    window.game = new SlotMachine();
+});
