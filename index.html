@@ -6,118 +6,111 @@
     <title>Lucky Casino Royal</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        @keyframes flash {
-            0% { opacity: 0; }
-            50% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-
-        .particles {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-        }
-
-        .particle {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: gold;
-            border-radius: 50%;
-            animation: particle 1s ease-out;
-        }
-
-        @keyframes particle {
-            0% {
-                transform: translate(var(--tx), var(--ty));
-                opacity: 1;
-            }
-            100% {
-                transform: translate(0, 0);
-                opacity: 0;
-            }
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="background-overlay"></div>
+    <div class="light-effects">
+        <div class="spotlight spotlight-left"></div>
+        <div class="spotlight spotlight-right"></div>
+    </div>
 
     <!-- Звуковые эффекты -->
-    <audio id="spinSound" src="spin.mp3"></audio>
-    <audio id="winSound" src="win.mp3"></audio>
-    <audio id="bigWinSound" src="bigwin.mp3"></audio>
-    <audio id="bonusSound" src="bonus.mp3"></audio>
-    <audio id="bgMusic" src="background.mp3" loop autoplay></audio>
+    <audio id="spinSound" src="media/spin.mp3"></audio>
+    <audio id="winSound" src="media/win.mp3"></audio>
+    <audio id="bigWinSound" src="media/bigwin.mp3"></audio>
+    <audio id="bonusSound" src="media/bonus.mp3"></audio>
+    <audio id="bgMusic" src="media/background.mp3" loop></audio>
+
+    <div class="particles-container" id="particlesContainer"></div>
 
     <div class="game-container">
+        <div class="game-title">
+            <h1>Lucky Casino Royal</h1>
+        </div>
+
         <div class="header">
             <div class="stats">
                 <div class="balance-container">
-                    Баланс: <span id="balance">1000</span>₽
+                    <span class="stats-label">Баланс:</span>
+                    <span id="balance" class="stats-value">1000</span>
+                    <span class="currency">₽</span>
                 </div>
                 <div class="bet-container">
-                    Ставка: <span id="currentBet">10</span>₽
+                    <span class="stats-label">Ставка:</span>
+                    <span id="currentBet" class="stats-value">10</span>
+                    <span class="currency">₽</span>
                 </div>
             </div>
             <div class="sound-controls">
                 <button id="toggleMusic" class="icon-button">
                     <span class="sound-icon">🔊</span>
-                    <div class="sound-waves"></div>
+                    <div class="sound-waves">
+                        <span></span><span></span><span></span>
+                    </div>
                 </button>
                 <input type="range" id="volumeControl" min="0" max="1" step="0.1" value="0.3" class="volume-slider">
             </div>
         </div>
 
         <div class="slot-machine">
+            <div class="slot-machine-top"></div>
+            <div class="slot-machine-lights">
+                <div class="light"></div>
+                <div class="light"></div>
+                <div class="light"></div>
+                <div class="light"></div>
+                <div class="light"></div>
+                <div class="light"></div>
+                <div class="light"></div>
+            </div>
             <div class="slot-frame">
-                <div class="slot-grid" id="slotGrid">
-                    <div class="reel">
-                        <div class="slot-cell">🍒</div>
-                        <div class="slot-cell">🍋</div>
-                        <div class="slot-cell">🍉</div>
-                    </div>
-                    <div class="reel">
-                        <div class="slot-cell">🍇</div>
-                        <div class="slot-cell">🍀</div>
-                        <div class="slot-cell">💎</div>
-                    </div>
-                    <div class="reel">
-                        <div class="slot-cell">🍋</div>
-                        <div class="slot-cell">🍉</div>
-                        <div class="slot-cell">🍒</div>
+                <div class="slot-frame-inner">
+                    <div class="slot-grid" id="slotGrid">
+                        <div class="reel">
+                            <div class="slot-cell">🍒</div>
+                            <div class="slot-cell">🍋</div>
+                            <div class="slot-cell">🍉</div>
+                        </div>
+                        <div class="reel">
+                            <div class="slot-cell">🍇</div>
+                            <div class="slot-cell">🍀</div>
+                            <div class="slot-cell">💎</div>
+                        </div>
+                        <div class="reel">
+                            <div class="slot-cell">🍋</div>
+                            <div class="slot-cell">🍉</div>
+                            <div class="slot-cell">🍒</div>
+                        </div>
                     </div>
                 </div>
+                <div class="slot-reflection"></div>
             </div>
+            <div class="slot-machine-bottom"></div>
         </div>
 
         <div class="controls">
             <div class="bet-controls">
-                <button onclick="game.setBet(500)" class="bet-button">500₽</button>
                 <button onclick="game.setBet(10)" class="bet-button">10₽</button>
                 <button onclick="game.setBet(50)" class="bet-button">50₽</button>
                 <button onclick="game.setBet(100)" class="bet-button">100₽</button>
+                <button onclick="game.setBet(500)" class="bet-button">500₽</button>
                 <button onclick="game.changeBet(-10)" class="bet-button">-10</button>
-                <button onclick="game.setMaxBet()" class="bet-button">MAX</button>
+                <button onclick="game.setMaxBet()" class="bet-button max-bet">MAX</button>
                 <button onclick="game.changeBet(10)" class="bet-button">+10</button>
             </div>
-            <button id="spinButton" class="spin-button" onclick="game.spin()">КРУТИТЬ</button>
+            <button id="spinButton" class="spin-button" onclick="game.spin()">
+                <span class="spin-text">КРУТИТЬ</span>
+                <span class="spin-icon"></span>
+            </button>
         </div>
 
         <div class="bonus-info">
+            <div class="bonus-title">Бонусная шкала</div>
             <div class="bonus-progress">
                 <div class="progress-bar" id="bonusProgress"></div>
             </div>
             <div class="free-spins" id="freeSpinsCounter"></div>
-        </div>
-
-        <div id="winPopup" class="win-popup">
-            <div class="win-content">
-                <h2>ПОБЕДА!</h2>
-                <p>Выигрыш: <span id="winAmount">0</span>₽</p>
-            </div>
         </div>
     </div>
 
@@ -125,29 +118,36 @@
         <h3>Таблица выплат</h3>
         <div class="paytable-grid">
             <div class="paytable-item">
-                <span>💎💎💎</span>
-                <span>x50</span>
+                <span class="symbol">💎💎💎</span>
+                <span class="multiplier">x50</span>
             </div>
             <div class="paytable-item">
-                <span>🍀🍀🍀</span>
-                <span>x20</span>
+                <span class="symbol">🍀🍀🍀</span>
+                <span class="multiplier">x20</span>
             </div>
             <div class="paytable-item">
-                <span>🍇🍇🍇</span>
-                <span>x10</span>
+                <span class="symbol">🍇🍇🍇</span>
+                <span class="multiplier">x10</span>
             </div>
             <div class="paytable-item">
-                <span>🍉🍉🍉</span>
-                <span>x5</span>
+                <span class="symbol">🍉🍉🍉</span>
+                <span class="multiplier">x5</span>
             </div>
             <div class="paytable-item">
-                <span>🍋🍋🍋</span>
-                <span>x3</span>
+                <span class="symbol">🍋🍋🍋</span>
+                <span class="multiplier">x3</span>
             </div>
             <div class="paytable-item">
-                <span>🍒🍒🍒</span>
-                <span>x2</span>
+                <span class="symbol">🍒🍒🍒</span>
+                <span class="multiplier">x2</span>
             </div>
+        </div>
+    </div>
+
+    <div id="winPopup" class="win-popup">
+        <div class="win-content">
+            <h2>ПОБЕДА!</h2>
+            <p>Выигрыш: <span id="winAmount">0</span>₽</p>
         </div>
     </div>
 
